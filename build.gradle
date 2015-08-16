@@ -1,0 +1,125 @@
+/*
+ * Icarus build file.
+ */
+
+//================================================
+// Variables
+def mod_version = '0.0.1'
+def mc_ver = '1.7.10'
+def forge_ver = "10.13.4.1448-${mc_ver}"
+def jetty_ver = '9.3.2.v20150730'
+def prometheus_ver = '0.0.10'
+
+//================================================
+// Pre-execute
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Forge'
+            url = 'http://files.minecraftforge.net/maven'
+        }
+        // Sonatype (for SpecialSource in 1.7+)
+        maven {
+            name = "Sonatype Nexus"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+    }
+}
+
+repositories {
+    maven {
+        name 'Forge'
+        url 'http://files.minecraftforge.net/maven'
+    }
+    mavenCentral()
+    maven {
+        name 'MinecraftS3'
+        url 'http://s3.amazonaws.com/Minecraft.Download/libraries'
+    }
+}
+
+apply plugin: 'scala'
+apply plugin: 'forge'
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+dependencies {
+    shade "io.prometheus:simpleclient:${prometheus_ver}"
+    shade "io.prometheus:simpleclient_hotspot:${prometheus_ver}"
+    shade "io.prometheus:simpleclient_servlet:${prometheus_ver}"
+    shade "org.eclipse.jetty:jetty-server:${jetty_ver}"
+}
+
+// Setup Forge plugin
+minecraft {
+    version = mc_ver + "-" + forge_ver
+    runDir = 'run'
+    replace '@VERSION@', mod_version
+}
+
+//================================================
+// Jar data
+
+// Grab system env
+def env = System.getenv()
+
+version = "${mc_ver}-${mod_version}"
+
+// Drone manifest
+def droneManifest = manifest {
+    if (env.DRONE != null) {
+        attributes("Drone-Build": "true", "Drone-Build-ID": env.DRONE_BUILD_NUMBER, "Drone-Commit": env.DRONE_COMMIT,
+                   "Drone-Branch": env.DRONE_BRANCH, "Drone-Repo-Slug": env.DRONE_REPO_SLUG)
+        version += "-d${env.DRONE_BUILD_NUMBER}"
+    } else {
+        attributes("Drone-Build": "false")
+    }
+}
+
+// Version manifest
+def verManifest = manifest {
+    attributes("Mod-Version": mod_version, "Forge-Version": mc_ver + "-" + forge_ver, "Jetty-Version": jetty_ver,
+               "Prometheus-Version": prometheus_ver)
+}
+
+processResources {
+    // Make sure this gets re-executed on updates.
+    inputs.property "version", version
+    inputs.property "MCversion", mc_ver
+    
+    // Process mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.info'
+        expand 'version':mod_version,'MCversion':mc_ver
+    }
+
+    // Copy anything else directly
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.info'
+    }
+}
+
+//================================================
+// Jar tasks
+
+jar {
+    // Shading
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+
+    // Merge Jenkins and Git manifests to form final manifest in final release jar
+    manifest {
+        from droneManifest, verManifest
+    }
+}
