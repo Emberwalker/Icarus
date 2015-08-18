@@ -1,14 +1,14 @@
 package io.drakon.icarus.prometheus.metric
 
 import java.util
-import io.prometheus.client.Collector.MetricFamilySamples.Sample
-import net.minecraft.server.MinecraftServer
-import net.minecraft.tileentity.TileEntity
-
 import scala.collection.JavaConversions._
 
 import io.prometheus.client.Collector
 import io.prometheus.client.Collector.{MetricFamilySamples, Type}
+import io.prometheus.client.Collector.MetricFamilySamples.Sample
+
+import net.minecraft.server.MinecraftServer
+import net.minecraft.tileentity.TileEntity
 
 /**
  * Collector for MC world statistics (entity/TE/active chunk counts)

@@ -1,7 +1,8 @@
 package io.drakon.icarus.prometheus
 
 import io.drakon.icarus.Icarus
-import io.drakon.icarus.prometheus.metric.{WorldStatsCollector, TickCollector}
+import io.drakon.icarus.prometheus.metric.{PlayerCollector, WorldStatsCollector, TickCollector}
+
 import io.prometheus.client.hotspot
 
 /**
@@ -24,6 +25,7 @@ object PrometheusHandler {
       Icarus.log.info("Attaching Icarus metric collectors...")
       new TickCollector().register()
       new WorldStatsCollector().register()
+      new PlayerCollector().register()
 
       Icarus.log.info("Collectors attached.")
       __initialized = true

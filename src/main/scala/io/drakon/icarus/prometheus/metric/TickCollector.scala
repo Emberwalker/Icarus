@@ -1,14 +1,14 @@
 package io.drakon.icarus.prometheus.metric
 
 import java.util
+import scala.collection.JavaConversions._
 
 import io.prometheus.client.Collector
 import io.prometheus.client.Collector.MetricFamilySamples.Sample
 import io.prometheus.client.Collector.{MetricFamilySamples, Type}
+
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.World
-
-import scala.collection.JavaConversions._
 
 /**
  * Prometheus collector for TPS.
@@ -47,14 +47,14 @@ class TickCollector extends Collector {
     List(tpsSample, tickMsSample)
   }
 
-  private def getTickSum(times:Array[Long]): Double = {
+  private def getTickSum(times: Array[Long]): Double = {
     if (times == null) return 0.0D
 
     times.sum / times.length
   }
 
-  private def getTickMs(w:World): Double = {
-    var ms:Array[Long] = null
+  private def getTickMs(w: World): Double = {
+    var ms: Array[Long] = null
     if (w == null) {
       ms = MinecraftServer.getServer.tickTimeArray
     } else {
@@ -64,7 +64,7 @@ class TickCollector extends Collector {
     getTickSum(ms) * 1.0E-006D
   }
 
-  private def getTps(w:World): Double = {
+  private def getTps(w: World): Double = {
     val tps = 1000.0D / getTickMs(w)
     if (tps > 20.0D) 20.0D else tps
   }
