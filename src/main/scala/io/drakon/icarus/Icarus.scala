@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager
  *
  * @author Arkan <arkan@drakon.io>
  */
-@Mod(modid = "icarus", name = "Icarus", version = "@VERSION@", modLanguage = "scala")
+@Mod(modid = "icarus", name = "Icarus", version = "@VERSION@", acceptableRemoteVersions = "*", modLanguage = "scala")
 object Icarus {
 
   val log = LogManager.getLogger("Icarus")
