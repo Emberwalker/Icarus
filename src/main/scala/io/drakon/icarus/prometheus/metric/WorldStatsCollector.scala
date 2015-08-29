@@ -18,6 +18,7 @@ import net.minecraft.tileentity.TileEntity
 class WorldStatsCollector extends Collector {
 
   override def collect(): util.List[MetricFamilySamples] = {
+    if (MinecraftServer.getServer == null) return List()
     List.concat(
       getEntitySamples,
       getTESamples,

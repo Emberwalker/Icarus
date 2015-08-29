@@ -20,6 +20,7 @@ import net.minecraft.world.World
 class TickCollector extends Collector {
 
   override def collect(): util.List[MetricFamilySamples] = {
+    if (MinecraftServer.getServer == null) return List()
     val tpsSample = new MetricFamilySamples(
       "mc_tps",
       Type.GAUGE,

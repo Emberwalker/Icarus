@@ -15,11 +15,14 @@ import net.minecraft.server.MinecraftServer
  */
 class PlayerCollector extends Collector {
 
-  override def collect(): util.List[MetricFamilySamples] = List.concat(
-    getPlayerCountSamples,
-    getPlayerLatencyAvgSamples,
-    getPlayerLatencySamples
-  )
+  override def collect(): util.List[MetricFamilySamples] = {
+    if (MinecraftServer.getServer == null) return List()
+    List.concat(
+      getPlayerCountSamples,
+      getPlayerLatencyAvgSamples,
+      getPlayerLatencySamples
+    )
+  }
 
   private def getPlayerCountSamples: List[MetricFamilySamples] = {
     val plCount = MinecraftServer.getServer.getCurrentPlayerCount
